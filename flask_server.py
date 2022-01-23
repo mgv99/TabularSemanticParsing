@@ -22,7 +22,7 @@ args.model_id = utils.model_index[args.model]
 assert(args.model_id is not None)
 
 ROOT_SECTION = 'root'
-CONFIG_FILE_PATH = 'Bot/src/main/resources/bot.properties'
+CONFIG_FILE_PATH = '../Bot/src/main/resources/bot.properties'
 
 def loadConfig():
     ini_str = '[' + ROOT_SECTION + ']\n' + open(CONFIG_FILE_PATH, 'r').read()
@@ -33,7 +33,7 @@ def loadConfig():
 
 def setup(args):
     csv_name = config.get(ROOT_SECTION, 'xls.importer.xls')[:-4]
-    csv_dir = config.get(ROOT_SECTION, 'CSV_DIR')
+    csv_dir = args.csv_dir
     
     global db_path
     db_path = os.path.join(csv_dir, '{}.sqlite'.format(csv_name))
