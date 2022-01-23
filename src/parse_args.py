@@ -13,6 +13,10 @@ import os
 
 parser = argparse.ArgumentParser(description='Neural Semantic Parsing with Transformer-Pointer Network')
 
+# CSV Database
+parser.add_argument('--csv_name', type=str, default=None)
+parser.add_argument('--csv_dir', type=str, default=None)
+
 # Experiment control
 parser.add_argument('--process_data', action='store_true',
                     help='data preprocessing and numericalization (default: False)')
