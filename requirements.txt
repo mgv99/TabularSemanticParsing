@@ -11,6 +11,8 @@ asciitree
 apex
 nltk==3.4.5
 rapidfuzz==0.9.1
+pandas
+flask
 
 # wikisql
 records
