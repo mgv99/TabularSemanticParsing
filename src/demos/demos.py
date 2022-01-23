@@ -31,7 +31,7 @@ def load_semantic_parser(args):
     else:
         raise NotImplementedError
     sp.load_checkpoint(get_checkpoint_path(args))
-    sp.cuda()
+    #sp.cuda()
     sp.eval()
     return sp
 
@@ -43,7 +43,7 @@ def load_confusion_span_detector(args):
     else:
         print('Warning: translatability checker checkpoint not specified')
         return None
-    tc.cuda()
+    #tc.cuda()
     tc.eval()
     return tc
 

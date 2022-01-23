@@ -28,7 +28,7 @@ from src.trans_checker.args import args
 from src.utils.trans import bert_utils as bu
 import src.utils.utils as utils
 
-torch.cuda.set_device('cuda:{}'.format(args.gpu))
+#torch.cuda.set_device('cuda:{}'.format(args.gpu))
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 

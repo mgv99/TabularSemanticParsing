@@ -357,7 +357,7 @@ def positional_encodings_like(x, t=None):
 
 
 def arange_cuda(x, dtype=torch.long):
-    return torch.arange(x, dtype=dtype).cuda()
+    return torch.arange(x, dtype=dtype)#.cuda()
 
 
 def batch_arange_cuda(batch_size, x, dtype=torch.long):
@@ -366,64 +366,65 @@ def batch_arange_cuda(batch_size, x, dtype=torch.long):
 
 
 def byte_ones_var_cuda(s, requires_grad=False):
-    return torch.ones(s, dtype=torch.uint8, requires_grad=requires_grad).cuda()
+    return torch.ones(s, dtype=torch.uint8, requires_grad=requires_grad)#.cuda()
 
 
 def ones_var_cuda(s, requires_grad=False, dtype=torch.float32):
-    return torch.ones(s, requires_grad=requires_grad, dtype=dtype).cuda()
+    return torch.ones(s, requires_grad=requires_grad, dtype=dtype)#.cuda()
 
 
 def int_ones_var_cuda(s, requires_grad=False):
-    return torch.ones(s, dtype=torch.long, requires_grad=requires_grad).cuda()
+    return torch.ones(s, dtype=torch.long, requires_grad=requires_grad)#.cuda()
 
 
 def zeros_like_cuda(x, requires_grad=False, dtype=torch.float32):
-    return torch.zeros_like(x, requires_grad=requires_grad, dtype=dtype).cuda()
+    return torch.zeros_like(x, requires_grad=requires_grad, dtype=dtype)#.cuda()
 
 
 def byte_zeros_var_cuda(s, requires_grad=False):
-    return torch.zeros(s, dtype=torch.uint8, requires_grad=requires_grad).cuda()
+    return torch.zeros(s, dtype=torch.uint8, requires_grad=requires_grad)#.cuda()
 
 
 def zeros_var_cuda(s, requires_grad=False, dtype=torch.float32):
-    return torch.zeros(s, requires_grad=requires_grad, dtype=dtype).cuda()
+    return torch.zeros(s, requires_grad=requires_grad, dtype=dtype)#.cuda()
 
 
 def int_zeros_var_cuda(s, requires_grad=False):
-    return torch.zeros(s, dtype=torch.long, requires_grad=requires_grad).cuda()
+    return torch.zeros(s, dtype=torch.long, requires_grad=requires_grad)#.cuda()
 
 
 def int_fill_var_cuda(s, value, requires_grad=False):
-    return torch.zeros(s, dtype=torch.long, requires_grad=requires_grad).cuda() + value
+    #return torch.zeros(s, dtype=torch.long, requires_grad=requires_grad).cuda() + 
+    return torch.zeros(s, dtype=torch.long, requires_grad=requires_grad) + value
 
 
 def fill_var_cuda(s, value, dtype=None, requires_grad=False):
-    return torch.zeros(s, dtype=dtype, requires_grad=requires_grad).cuda() + value
-
+    #return torch.zeros(s, dtype=dtype, requires_grad=requires_grad).cuda() + value
+    return torch.zeros(s, dtype=dtype, requires_grad=requires_grad) + value
 
 def byte_var_cuda(x, requires_grad=False):
-    tx = torch.ByteTensor(x).cuda()
+    tx = torch.ByteTensor(x)#.cuda()
     if requires_grad:
         tx.requires_grad_()
     return tx
 
 
 def int_var_cuda(x, requires_grad=False):
-    tx = torch.IntTensor(x).cuda()
+    tx = torch.IntTensor(x)#.cuda()
     if requires_grad:
         tx.requires_grad_()
     return tx
 
 
 def long_var_cuda(x, requires_grad=False):
-    tx = torch.LongTensor(x).cuda()
+    tx = torch.LongTensor(x)#.cuda()
     if requires_grad:
         tx.requires_grad_()
     return tx
 
 
 def var_cuda(x, requires_grad=False):
-    tx = torch.Tensor(x).cuda()
+    tx = torch.Tensor(x)#.cuda()
     if requires_grad:
         tx.requires_grad_()
     return tx
