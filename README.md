@@ -1,6 +1,20 @@
 # Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing
 
-This is the official code release of the following paper:
+***
+**01/24/2022**
+
+This repository is a fork of the [official release](https://github.com/salesforce/TabularSemanticParsing).
+The objective of this repository is to make it possible to deploy the original model into a server, so it can be used 
+to respond queries made by other applications (i.e. translate natural language texts into SQL statements, and also 
+return the result of the SQL queries executed in a database). 
+
+In our use case, this server is used to help chatbots of the
+[bodi-generator](https://github.com/opendata-for-all/bodi-generator) project answer natural language 
+questions by executing their respective SQL translations into databases made up by .csv files.
+
+***
+
+This is (not) the official code release of the following paper:
 
 Xi Victoria Lin, Richard Socher and Caiming Xiong. [Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing](https://arxiv.org/abs/2012.12627). Findings of EMNLP 2020.
 
@@ -41,109 +55,33 @@ python3 -m pip install -r requirements.txt
 export PYTHONPATH=`pwd` && python -m nltk.downloader punkt
 ```
 
-### Process Data
+### Deploy the server
 
-#### Spider
+Before deploying the server, you may want to edit some variables for your purpose.
 
-Download the [official data release](https://drive.google.com/u/1/uc?export=download&confirm=pft3&id=1_AckYkinAnhqmRQtGsQgUKAnTHxxX5J0) and unzip the folder. Manually merge `spider/train_spider.json` with `spider/train_others.json` into a single file `spider/train.json`.
+#### run_server.sh
+
+- **checkpoint_path**: the path to the model checkpoint
+- **csv_dir**: the directory where the csv files (i.e. the database) are stored
+
+#### flask_server.py
+
+- **CONFIG_FILE_PATH**: the path to a .properties file that contains properties used within the server. These 
+  properties 
+  are:
+  - **xls.importer.xls**: the name of the csv file used as a database
+  - **SERVER_URL**: the URL where the server is deployed
+  - **RUN_MODEL_ENDPOINT_TABLE**: the endpoint of the server used to make requests to query the database with natural 
+    language sentences
+
 ```
-mv spider data/ 
-
-# Data Repair (more details in section 4.3 of paper)
-python3 data/spider/scripts/amend_missing_foreign_keys.py data/spider
-
-./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --process_data 0
+./run_server.sh
 ```
-
-#### WikiSQL
-
-Download the [official data release](https://github.com/salesforce/WikiSQL/blob/master/data.tar.bz2).
-```
-wget https://github.com/salesforce/WikiSQL/raw/master/data.tar.bz2
-tar xf data.tar.bz2 -C data && mv data/data data/wikisql1.1
-./experiment-bridge.sh configs/bridge/wikisql-bridge-bert-large.sh --process_data 0
-```
-
-The processed data will be stored in a separate pickle file. 
-
-### Train 
-Train the model using the following commands. The checkpoint of the best model will be stored in a directory [specified by the hyperparameters](https://github.com/salesforce/TabularSemanticParsing/blob/25b154d3dc0e25922822433400c453274d38b8c8/src/data_processor/path_utils.py#L309) in the configuration file. 
-
-#### Spider
-```
-./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --train 0
-```
-
-#### WikiSQL
-```
-./experiment-bridge.sh configs/bridge/wikisql-bridge-bert-large.sh --train 0
-```
-
-### Inference
-Decode SQL predictions from pre-trained models. The following commands run inference with the checkpoints stored in the directory specified by the hyperparameters in the configuration file. 
-
-#### Spider
-```
-./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --inference 0
-```
-
-#### WikiSQL
-```
-./experiment-bridge.sh configs/bridge/wikisql-bridge-bert-large.sh --inference 0
-```
-**Note:** 
-1. Add the `--test` flag to the above commands to obtain the test set evaluation results on the corresponding dataset. This flag is invalid for Spider, as its test set is hidden.
-2. Add the `--checkpoint_path [path_to_checkpoint_tar_file]` flag to decode using a checkpoint that's not stored in the default location.
-3. Evaluation metrics will be printed out at the end of decoding. The WikiSQL evaluation takes some time because it computes execution accuracy.
-
-<!--You can download two of our pre-trained checkpoints for Spider here:
-<table>
-   <tr>
-      <td><strong></strong></td>
-      <td>Spider E-SM (dev)</td>
-      <td>Spider Ex-Acc (dev)</td>
-      <td>Spider E-SM (test)</td>
-      <td>Spider Ex-Acc (test)</td>
-   </tr>
-   <tr>
-      <td>[Checkpoint-1]()</td>
-      <td>70.1</td>
-      <td>68.2</td>
-      <td>65.0</td>
-      <td>64.3</td>
-   </tr>
-   <tr>
-      <td>[Checkpoint-2]()</td>
-      <td>69.1</td>
-      <td>67.1</td>
-      <td>--</td>
-      <td>--</td>
-   </tr>
-</table>-->
-
-### Inference with Model Ensemble
-To decode with model ensemble, first list the checkpoint directories of the individual models in the [ensemble model configuration file](src/semantic_parser/ensemble_configs.py), then run the following command(s).
-
-#### Spider
-```
-./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --ensemble_inference 0
-```
-
-### Commandline Demo
-You can interact with a pre-trained checkpoint through the commandline using the following commands:
-
-#### Spider
-```
-./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --demo 0 --demo_db [db_name] --checkpoint_path [path_to_checkpoint_tar_file]
-```
-
-### Hyperparameter Changes
-To change the hyperparameters and other experiment set up, start from the [configuration files](configs).
 
 ## Pre-trained Checkpoints
 
 #### Spider
-Download pre-trained checkpoints here:
+Download pre-trained checkpoint here:
 <table>
    <tr>
       <td><strong>URL</strong></td>
@@ -161,27 +99,8 @@ Download pre-trained checkpoints here:
 mv bridge-spider-bert-large-ems-70-1-exe-68-2.tar.gz model
 gunzip model/bridge-spider-bert-large-ems-70-1-exe-68-2.tar.gz
 ```
-
-Download cached SQL execution order to normal order mappings:
-<table>
-   <tr>
-      <td><strong>URL</strong></td>
-   </tr>
-   <tr>
-      <td>https://drive.google.com/file/d/1vk14iR4V_f5x4e17MAaL_L8T9wgjcKCy/view?usp=sharing</td>
-   </tr>
-</table>
-
-**Why this cache?** The overhead of converting thousands of SQL queries from execution order to normal order is large, so we cached the conversion for Spider dev set in our experiments. Without using the cache inference on the dev set will be slow. The model still runs fast for individual queries without using a cache.
-
-```
-mv dev.eo.pred.restored.pkl.gz data/spider
-gunzip data/spider/dev.eo.pred.restored.pkl.gz
-```
-<!-- Run inference with the downloaded checkpoint:
-```
-./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --inference 0 --checkpoint_path model/bridge-spider-bert-large-ems-70-1-exe-68-2.tar
-```-->
+(There are other checkpoints available in the original repository, but since we have only tested this one, we 
+recommend using it)
 
 ## Citation
 If you find the resource in this repository helpful, please cite
