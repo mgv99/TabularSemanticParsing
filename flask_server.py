@@ -32,7 +32,7 @@ def loadConfig():
     return config
 
 def setup(args):
-    csv_name = config.get(ROOT_SECTION, 'xls.importer.xls')[:-4]
+    csv_name = config.get(ROOT_SECTION, 'xls.importer.xls')[:-4] # Remove the extension ".csv" from the file name
     csv_dir = args.csv_dir
     
     global db_path
