@@ -16,6 +16,7 @@ from pathlib import Path
 import sqlite3
 import pandas as pd
 import configparser
+import re
 
 # Set model ID
 args.model_id = utils.model_index[args.model]
@@ -59,21 +60,71 @@ app = Flask(__name__)
 app.config['SERVER_NAME'] = config.get(ROOT_SECTION, 'SERVER_URL')
 t2sql, schema = setup(args)
 
+def addFieldsToSql(fields, sql_query):
+    select_all_from = re.search(r'SELECT \* FROM', sql_query)
+    if select_all_from:
+        select_fields_str = 'SELECT ' + fields[0]
+        for f in fields[1:]:
+            select_fields_str += ', {}'.format(f)
+        select_fields_str += ' FROM'
+        return select_fields_str + sql_query[select_all_from.span(0)[1]:]
+    else:
+        return sql_query
+
+def addFiltersToSql(filters, sql_query):
+    select_from_where_orderby = re.search(r'SELECT (.)* FROM (.)* WHERE (.)* ORDER BY (.)*', sql_query)
+    select_from_orderby = re.search(r'SELECT (.)* FROM (.)* ORDER BY (.)*', sql_query)
+    select_from_where = re.search(r'SELECT (.)* FROM (.)* WHERE (.)*', sql_query)
+    select_from = re.search(r'SELECT (.)* FROM (.)*', sql_query)
+    orderby_str = ''
+
+    orderby = re.search(r'ORDER BY (.)*', sql_query)
+    if select_from_where_orderby:
+        orderby_str = sql_query[orderby.span(0)[0] : orderby.span(0)[1]]
+        sql_query = sql_query[:orderby.span(0)[0]]
+    elif select_from_orderby:
+        orderby_str = sql_query[orderby.span(0)[0] : orderby.span(0)[1]]
+        sql_query = sql_query[:orderby.span(0)[0]] + ' WHERE 1=1'
+    elif select_from_where:
+        True
+    elif select_from:
+        sql_query += ' WHERE 1=1'
+    for f in filters:
+        sql_query += ' AND ({})'.format(f)
+    if orderby:
+        sql_query += ' ' + orderby_str
+    return sql_query
+        
+
 @app.route('/' + config.get(ROOT_SECTION, 'RUN_MODEL_ENDPOINT_TABLE'), methods=['POST'])
 def runModelSQL():
     body = request.get_json()
-    input_text = body["input"]
+    input_text = body['input']
+    fields = body["fields"]
+    filters = body['filters']
+    ignoreCase = body['ignoreCase']
     
     output = t2sql.process(input_text, schema.name)
     sql_query = output['sql_query']
-    
-    conn = sqlite3.connect(db_path)
-    c =conn.cursor()
-    c.execute(sql_query)
-    header = []
-    for column in c.description:
-        header.append(column[0])
-    table = c.fetchall()
+    if sql_query is None:
+        sql_query = ''
+        header = []
+        table = []
+    else:
+        if fields:
+            sql_query = addFieldsToSql(fields, sql_query)
+        if filters:
+            sql_query = addFiltersToSql(filters, sql_query)
+        if ignoreCase:
+            sql_query += " COLLATE NOCASE"
+        
+        conn = sqlite3.connect(db_path)
+        c =conn.cursor()
+        c.execute(sql_query)
+        header = []
+        for column in c.description:
+            header.append(column[0])
+        table = c.fetchall()
     print("* input = " + input_text)
     print("* sql = " + sql_query)
     print("* header = " + str(header))
