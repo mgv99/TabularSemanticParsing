@@ -770,13 +770,13 @@ class SchemaGraph(object):
 
         self.create_adjacency_matrix()
 
-    def load_data_from_csv_file(self, in_csv, field_type_file=None):
+    def load_data_from_csv_file(self, in_csv, delimiter=',', field_type_file=None):
         data_types = None
         if field_type_file is not None:
             with open(field_type_file) as f:
                 data_types = [x.strip() for x in f.readlines()]
         with open(in_csv) as f:
-            reader = csv.reader(f)
+            reader = csv.reader(f, delimiter=delimiter)
             table_header = next(reader)
             table_header = [x.replace(' (SF LISTINGS.csv)', '') for x in table_header]
             assert(data_types is None or len(table_header) == len(data_types))

@@ -42,14 +42,15 @@ def setup(args):
     print("* db_path = " + db_path + "\n")
     schema = SchemaGraph(csv_name, db_path=db_path)
     csv_path = os.path.join(csv_dir, '{}.csv'.format(csv_name))
+    delimiter = config.get(ROOT_SECTION, 'csv.delimiter').encode().decode("unicode_escape")
     if not os.path.exists(db_path):    
         Path(db_path).touch()
         conn = sqlite3.connect(db_path)
-        csv = pd.read_csv(csv_path)
+        csv = pd.read_csv(csv_path, sep=delimiter)
         csv.to_sql(csv_name, conn, if_exists='append', index = False)
         conn.close()
     #in_type = os.path.join(csv_dir, '{}.types'.format(csv_name))
-    schema.load_data_from_csv_file(csv_path)#, in_type)
+    schema.load_data_from_csv_file(csv_path, delimiter)#, in_type)
     
     schema.pretty_print()
 
