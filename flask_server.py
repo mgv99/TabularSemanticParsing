@@ -12,7 +12,6 @@ import src.utils.utils as utils
 
 from flask import Flask, request
 from io import StringIO
-from pathlib import Path
 import sqlite3
 import pandas as pd
 import configparser
@@ -33,27 +32,24 @@ def loadConfig():
     return config
 
 def setup(args):
-    csv_name = config.get(ROOT_SECTION, 'xls.importer.xls')[:-4] # Remove the extension ".csv" from the file name
-    csv_dir = args.csv_dir
-    
     global db_path
+    csv_name = config.get(ROOT_SECTION, 'xls.importer.xls')[:-4] # Remove the extension '.csv' from the file name
+    csv_dir = args.csv_dir
     db_path = os.path.join(csv_dir, '{}.sqlite'.format(csv_name))
-    
-    print("* db_path = " + db_path + "\n")
+    print('* db_path = ' + db_path + '\n')
+    if os.path.exists(db_path):
+        os.remove(db_path)
     schema = SchemaGraph(csv_name, db_path=db_path)
     csv_path = os.path.join(csv_dir, '{}.csv'.format(csv_name))
-    delimiter = config.get(ROOT_SECTION, 'csv.delimiter').encode().decode("unicode_escape")
-    if not os.path.exists(db_path):    
-        Path(db_path).touch()
-        conn = sqlite3.connect(db_path)
-        csv = pd.read_csv(csv_path, sep=delimiter)
-        csv.to_sql(csv_name, conn, if_exists='append', index = False)
-        conn.close()
+    delimiter = config.get(ROOT_SECTION, 'csv.delimiter').encode().decode('unicode_escape')
+    conn = sqlite3.connect(db_path)
+    csv = pd.read_csv(csv_path, sep=delimiter)
+    print('* rows: ' + str(csv.shape[0]) + ', columns: ' + str(csv.shape[1]) + '\n')
+    csv.to_sql(csv_name, conn, if_exists='append', index = False)
+    conn.close()
     #in_type = os.path.join(csv_dir, '{}.types'.format(csv_name))
     schema.load_data_from_csv_file(csv_path, delimiter)#, in_type)
-    
     schema.pretty_print()
-
     return Text2SQLWrapper(args, cs_args, schema), schema
 
 config = loadConfig()
@@ -101,12 +97,13 @@ def addFiltersToSql(filters, sql_query):
 def runModelSQL():
     body = request.get_json()
     input_text = body['input']
-    fields = body["fields"]
+    fields = body['fields']
     filters = body['filters']
     ignoreCase = body['ignoreCase']
     
     output = t2sql.process(input_text, schema.name)
     sql_query = output['sql_query']
+
     if sql_query is None:
         sql_query = ''
         header = []
@@ -116,9 +113,8 @@ def runModelSQL():
             sql_query = addFieldsToSql(fields, sql_query)
         if filters:
             sql_query = addFiltersToSql(filters, sql_query)
-        if ignoreCase:
-            sql_query += " COLLATE NOCASE"
-        
+        if ignoreCase and re.search(r'SELECT (.)* FROM (.)* WHERE (.)*', sql_query):
+            sql_query += ' COLLATE NOCASE'
         conn = sqlite3.connect(db_path)
         c =conn.cursor()
         c.execute(sql_query)
@@ -126,16 +122,16 @@ def runModelSQL():
         for column in c.description:
             header.append(column[0])
         table = c.fetchall()
-    print("* input = " + input_text)
-    print("* sql = " + sql_query)
-    print("* header = " + str(header))
-    print("* table = " + str(table))
+    print('* input  = ' + input_text)
+    print('* sql    = ' + sql_query)
+    print('* header = ' + str(header))
+    print('* table  = ' + str(table))
     print()
     response = {
-        "input": input_text,
-        "sql": sql_query,
-        "header": header,
-        "table": table
+        'input': input_text,
+        'sql': sql_query,
+        'header': header,
+        'table': table
     }
     return response, 200
 
