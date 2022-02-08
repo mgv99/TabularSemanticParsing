@@ -48,7 +48,7 @@ class TransformerHiddens(nn.Module):
     def __init__(self, model, dropout=0.0, requires_grad=False):
         super().__init__()
         if model.startswith('bert'):
-            self.trans_parameters = BertModel.from_pretrained(model)
+            self.trans_parameters = BertModel.from_pretrained(model, return_dict=False)
         elif model.startswith('roberta'):
             self.trans_parameters = RobertaModel.from_pretrained(model)
         elif model == 'table-bert':

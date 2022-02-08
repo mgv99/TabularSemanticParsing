@@ -25,7 +25,7 @@ class EncoderDecoder(nn.Module):
         self.input_vocab_size = self.in_vocab.full_size
         self.output_vocab_size = self.out_vocab.size
         self.tu = utils.get_trans_utils(args)
-        self.max_in_seq_len = self.tu.tokenizer.max_len if args.pretrained_transformer != 'null' else args.max_in_seq_len
+        self.max_in_seq_len = self.tu.tokenizer.model_max_length if args.pretrained_transformer != 'null' else args.max_in_seq_len
         self.max_out_seq_len = args.max_out_seq_len
         self.encoder_input_dim = args.encoder_input_dim
         self.decoder_input_dim = args.decoder_input_dim

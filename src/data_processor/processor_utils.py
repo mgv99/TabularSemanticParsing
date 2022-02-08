@@ -33,7 +33,7 @@ def get_table_aware_transformer_encoder_inputs(text_tokens, text_features, schem
     """
     num_excluded_tables, num_excluded_fields = 0, 0
     num_separators = 3
-    max_schema_features_len = tu.tokenizer.max_len - num_separators - len(text_tokens)
+    max_schema_features_len = tu.tokenizer.model_max_length - num_separators - len(text_tokens)
     if len(schema_features) > max_schema_features_len:
         truncate_id = -1
         for i in range(len(schema_features)-1, -1, -1):

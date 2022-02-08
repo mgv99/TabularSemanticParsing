@@ -416,7 +416,7 @@ class LFramework(nn.Module):
         if os.path.isfile(input_file):
             print('=> loading checkpoint \'{}\''.format(input_file))
             checkpoint = torch.load(input_file, map_location=torch.device('cpu'))
-            self.load_state_dict(checkpoint['model_state_dict'])
+            self.load_state_dict(checkpoint['model_state_dict'], strict=False)
             if self.args.train:
                 self.start_step = checkpoint['interval_step_id'] + 1
                 if 'optimizer_state_dict' in checkpoint:
