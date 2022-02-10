@@ -1,7 +1,7 @@
 # Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing
 
 ***
-**01/24/2022**
+**02/10/2022**
 
 This repository is a fork of the [official release](https://github.com/salesforce/TabularSemanticParsing).
 The objective of this repository is to make it possible to deploy the original model into a server, so it can be used 
@@ -11,6 +11,9 @@ return the result of the SQL queries executed in a database).
 In our use case, this server is used to help chatbots of the
 [bodi-generator](https://github.com/opendata-for-all/bodi-generator) project answer natural language 
 questions by executing their respective SQL translations into databases made up by .csv files.
+
+The server that deploys this model can be found at
+[opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server)
 
 ***
 
@@ -53,29 +56,6 @@ python3 -m pip install -r requirements.txt
 ### Set up Environment
 ```
 export PYTHONPATH=`pwd` && python -m nltk.downloader punkt
-```
-
-### Deploy the server
-
-Before deploying the server, you may want to edit some variables for your purpose.
-
-#### run_server.sh
-
-- **checkpoint_path**: the path to the model checkpoint
-- **csv_dir**: the directory where the csv files (i.e. the database) are stored
-
-#### flask_server.py
-
-- **CONFIG_FILE_PATH**: the path to a .properties file that contains properties used within the server. These 
-  properties 
-  are:
-  - **xls.importer.xls**: the name of the csv file used as a database
-  - **SERVER_URL**: the URL where the server is deployed
-  - **RUN_MODEL_ENDPOINT_TABLE**: the endpoint of the server used to make requests to query the database with natural 
-    language sentences
-
-```
-./run_server.sh
 ```
 
 ## Pre-trained Checkpoints
