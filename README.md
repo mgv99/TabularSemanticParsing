@@ -46,7 +46,7 @@ Our model takes a natural language utterance and a database (schema + field pick
 
 Our implementation has been tested using Pytorch 1.7 and Cuda 11.0 with a single GPU.
 ```
-git clone https://github.com/salesforce/TabularSemanticParsing
+git clone https://github.com/mgv99/TabularSemanticParsing
 cd TabularSemanticParsing
 
 pip install torch torchvision
